@@ -14,6 +14,7 @@ import java.util.*;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
 import android.util.Log;
 
@@ -197,8 +198,8 @@ public class WeatherForecast {
 	public String getLocationName(int id) {
 		return Locations.get(id);
 	}
-	
-	public int getBitmapResource(String forecast){
+
+	public int getBitmapResource(String forecast) {
 		if (forecast.equals("晴")) {
 			return R.drawable.weather01;
 		}
@@ -283,35 +284,45 @@ public class WeatherForecast {
 		if (forecast.equals("雪のち雨")) {
 			return R.drawable.weather29;
 		}
-		
+
 		return 0;
 	}
 
 	public void getForecast(Context context, int id) {
 		Log.i(TAG, "getForecast");
 		try {
+			// 最後に取得してから一時間経過していない
+			Date lastUpdate = getLastUpdate(context, id);
+			Date now = new Date();
+			if((now.getTime() - lastUpdate.getTime()) < 3600000) {
+				if (mOnPostExecute != null) {
+					mOnPostExecute.onPostExecute();
+				}
+				return;
+			}
 			// システムから接続情報をとってくる
 			ConnectivityManager conMan = (ConnectivityManager) context
 					.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-			// モバイル回線（３G）の接続状態を取得
-			State mobile = conMan.getNetworkInfo(
-					ConnectivityManager.TYPE_MOBILE).getState();
-			// wifiの接続状態を取得
-			State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
-					.getState();
-
-			// 3Gデータ通信／wifi共に接続状態じゃない場合
-			if ((mobile != State.CONNECTED) && (wifi != State.CONNECTED)) {
+			boolean NetworkCONNECTED = false;
+			NetworkInfo[] networkInfos = conMan.getAllNetworkInfo();
+			for (NetworkInfo NetworkInfo : networkInfos) {
+				if (NetworkInfo.getState() == State.CONNECTED) {
+					NetworkCONNECTED = true;
+					break;
+				}
+			}
+			// ネットワーク接続状態じゃない場合
+			if (!NetworkCONNECTED) {
 				// ネットワーク未接続
-				Log.i(TAG, "ネットワーク未接続");
+				Log.e(TAG, "ネットワーク未接続");
 				return;
 			}
 			ForecastTask task = new ForecastTask(context);
 			task.execute(id);
 			Log.d(TAG, "getForecast ForecastTask");
 		} catch (Exception ex) {
-			Log.e(TAG, ex.getMessage());
+			ExceptionLog.Log(TAG, ex);
 		}
 	}
 
@@ -323,7 +334,7 @@ public class WeatherForecast {
 					0L);
 			return new Date(update);
 		} catch (Exception ex) {
-			Log.e(TAG, ex.getMessage());
+			ExceptionLog.Log(TAG, ex);
 		}
 		return null;
 	}
@@ -339,7 +350,7 @@ public class WeatherForecast {
 			Date date = FORMATTER.parse(pubdate);
 			return date;
 		} catch (Exception ex) {
-			Log.e(TAG, ex.getMessage());
+			ExceptionLog.Log(TAG, ex);
 		}
 		return null;
 	}
@@ -351,12 +362,16 @@ public class WeatherForecast {
 
 		public OneDayForecast(String forecast) {
 			Log.d(TAG, "OneDayForecast - " + forecast);
-			String[] forecasts = forecast.split(" ");
-			if (forecasts.length < 3)
-				return;
-			Hour = forecasts[0];
-			Forecast = forecasts[1];
-			Temp = forecasts[2];
+			try {
+				String[] forecasts = forecast.split(" ");
+				if (forecasts.length < 3)
+					return;
+				Hour = forecasts[0];
+				Forecast = forecasts[1];
+				Temp = forecasts[2];
+			} catch (Exception ex) {
+				ExceptionLog.Log(TAG, ex);
+			}
 		}
 	}
 
@@ -371,25 +386,32 @@ public class WeatherForecast {
 
 		public WeeklyForecast(String forecast) {
 			Log.d(TAG, "WeeklyForecast - " + forecast);
-			String[] forecasts = forecast.split(" ");
-			Date = forecasts[0];
-			Forecast = forecasts[1];
-			if (forecasts.length >= 4) {
-				Temp = forecasts[2];
-				String[] Temps = Temp.split("/");
-				MaxTemp = Temps[0];
-				MinTemp = Temps[1];
-				Probability = forecasts[3];
-				String[] probabilitys = Probability.split("/");
-				for (int i = 0; i < probabilitys.length; i++) {
-					Probabilitys.add(probabilitys[i]);
+			try {
+				String[] forecasts = forecast.split(" ");
+				Date = forecasts[0];
+				Forecast = forecasts[1];
+				if (forecasts.length >= 4) {
+					Temp = forecasts[2];
+					String[] Temps = Temp.split("/");
+					MaxTemp = Temps[0];
+					MinTemp = Temps[1];
+					Probability = forecasts[3];
+					String[] probabilitys = Probability.split("/");
+					for (int i = 0; i < probabilitys.length; i++) {
+						Probabilitys.add(probabilitys[i]);
+					}
+				} else {
+					Temp = "";
+					MaxTemp = "";
+					MinTemp = "";
+					Probability = forecasts[2];
+					String[] probabilitys = Probability.split("/");
+					for (int i = 0; i < probabilitys.length; i++) {
+						Probabilitys.add(probabilitys[i]);
+					}
 				}
-			} else {
-				Probability = forecasts[2];
-				String[] probabilitys = Probability.split("/");
-				for (int i = 0; i < probabilitys.length; i++) {
-					Probabilitys.add(probabilitys[i]);
-				}
+			} catch (Exception ex) {
+				ExceptionLog.Log(TAG, ex);
 			}
 		}
 	}
@@ -411,7 +433,7 @@ public class WeatherForecast {
 			}
 			return array;
 		} catch (Exception ex) {
-			Log.e(TAG, ex.getMessage());
+			ExceptionLog.Log(TAG, ex);
 		}
 		return null;
 	}
@@ -431,8 +453,21 @@ public class WeatherForecast {
 			}
 			return array;
 		} catch (Exception ex) {
-			Log.e(TAG, ex.getMessage());
+			ExceptionLog.Log(TAG, ex);
 		}
 		return null;
+	}
+
+	public static class ExceptionLog {
+		public static void Log(String tag, Exception e) {
+			for (int i = 0; i < e.getStackTrace().length; i++) {
+				Log.e(tag,
+						e.getStackTrace()[i].getFileName()
+								+ ":"
+								+ String.valueOf(e.getStackTrace()[i]
+										.getLineNumber()) + ":"
+								+ e.getStackTrace()[i].getMethodName());
+			}
+		}
 	}
 }
