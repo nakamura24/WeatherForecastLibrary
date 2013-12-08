@@ -200,91 +200,25 @@ public class WeatherForecast {
 	}
 
 	public int getBitmapResource(String forecast) {
-		if (forecast.equals("晴")) {
-			return R.drawable.weather01;
+		String forecasts[] = { "晴", "晴時々曇", "晴時々雨", "晴時々雪", "晴のち曇", "晴のち雨",
+				"晴のち雪", "曇", "曇時々晴", "曇時々雨", "曇時々雪", "曇のち晴", "曇のち雨", "曇のち雪",
+				"雨", "雨時々晴", "雨時々曇", "雨時々雪", "雨のち晴", "雨のち曇", "雨のち雪", "雪",
+				"雪時々晴", "雪時々曇", "雪時々雨", "雪のち晴", "雪のち曇", "雪のち雨", };
+		int icons[] = { R.drawable.icon01, R.drawable.icon02,
+				R.drawable.icon03, R.drawable.icon04, R.drawable.icon05,
+				R.drawable.icon06, R.drawable.icon07, R.drawable.icon08,
+				R.drawable.icon09, R.drawable.icon10, R.drawable.icon11,
+				R.drawable.icon12, R.drawable.icon13, R.drawable.icon14,
+				R.drawable.icon15, R.drawable.icon16, R.drawable.icon17,
+				R.drawable.icon18, R.drawable.icon19, R.drawable.icon20,
+				R.drawable.icon21, R.drawable.icon23, R.drawable.icon24,
+				R.drawable.icon25, R.drawable.icon26, R.drawable.icon27,
+				R.drawable.icon28, R.drawable.icon29, };
+		for (int i = 0; i < forecasts.length; i++) {
+			if (forecasts[i].equals(forecast)) {
+				return icons[i];
+			}
 		}
-		if (forecast.equals("晴時々曇")) {
-			return R.drawable.weather02;
-		}
-		if (forecast.equals("晴時々雨")) {
-			return R.drawable.weather03;
-		}
-		if (forecast.equals("晴時々雪")) {
-			return R.drawable.weather04;
-		}
-		if (forecast.equals("晴のち曇")) {
-			return R.drawable.weather05;
-		}
-		if (forecast.equals("晴のち雨")) {
-			return R.drawable.weather06;
-		}
-		if (forecast.equals("晴のち雪")) {
-			return R.drawable.weather07;
-		}
-		if (forecast.equals("曇")) {
-			return R.drawable.weather08;
-		}
-		if (forecast.equals("曇時々晴")) {
-			return R.drawable.weather09;
-		}
-		if (forecast.equals("曇時々雨")) {
-			return R.drawable.weather10;
-		}
-		if (forecast.equals("曇時々雪")) {
-			return R.drawable.weather11;
-		}
-		if (forecast.equals("曇のち晴")) {
-			return R.drawable.weather12;
-		}
-		if (forecast.equals("曇のち雨")) {
-			return R.drawable.weather13;
-		}
-		if (forecast.equals("曇のち雪")) {
-			return R.drawable.weather14;
-		}
-		if (forecast.equals("雨")) {
-			return R.drawable.weather15;
-		}
-		if (forecast.equals("雨時々晴")) {
-			return R.drawable.weather16;
-		}
-		if (forecast.equals("雨時々曇")) {
-			return R.drawable.weather17;
-		}
-		if (forecast.equals("雨時々雪")) {
-			return R.drawable.weather18;
-		}
-		if (forecast.equals("雨のち晴")) {
-			return R.drawable.weather19;
-		}
-		if (forecast.equals("雨のち曇")) {
-			return R.drawable.weather20;
-		}
-		if (forecast.equals("雨のち雪")) {
-			return R.drawable.weather21;
-		}
-		if (forecast.equals("雪")) {
-			return R.drawable.weather23;
-		}
-		if (forecast.equals("雪時々晴")) {
-			return R.drawable.weather24;
-		}
-		if (forecast.equals("雪時々曇")) {
-			return R.drawable.weather25;
-		}
-		if (forecast.equals("雪時々雨")) {
-			return R.drawable.weather26;
-		}
-		if (forecast.equals("雪のち晴")) {
-			return R.drawable.weather27;
-		}
-		if (forecast.equals("雪のち曇")) {
-			return R.drawable.weather28;
-		}
-		if (forecast.equals("雪のち雨")) {
-			return R.drawable.weather29;
-		}
-
 		return 0;
 	}
 
@@ -294,7 +228,7 @@ public class WeatherForecast {
 			// 最後に取得してから一時間経過していない
 			Date lastUpdate = getLastUpdate(context, id);
 			Date now = new Date();
-			if((now.getTime() - lastUpdate.getTime()) < 3600000) {
+			if ((now.getTime() - lastUpdate.getTime()) < 3600000) {
 				if (mOnPostExecute != null) {
 					mOnPostExecute.onPostExecute();
 				}
