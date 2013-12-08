@@ -322,6 +322,7 @@ public class WeatherForecast {
 			Log.d(TAG, "WeeklyForecast - " + forecast);
 			try {
 				String[] forecasts = forecast.split(" ");
+				if(forecasts.length < 3) return;
 				Date = forecasts[0];
 				Forecast = forecasts[1];
 				if (forecasts.length >= 4) {
